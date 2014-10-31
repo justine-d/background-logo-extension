@@ -40,7 +40,12 @@ const BackgroundLogo = new Lang.Class({
         let defaultUri = background._settings.get_default_value('picture-uri');
         let file = Gio.File.new_for_commandline_arg(defaultUri.deep_unpack());
 
-        this.actor.visible = (background._file && file.equal(background._file));
+        if (background._file) // > 3.14
+            this.actor.visible = background._file.equal(file);
+        else if (background._filename) // <= 3.14
+            this.actor.visible = background._filename == file.get_path();
+        else // background == NONE
+            this.actor.visible = false;
     },
 
     _backgroundDestroyed: function() {
