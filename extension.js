@@ -73,6 +73,7 @@ function forEachBackgroundManager(func) {
 }
 
 let monitorsChangedId = 0;
+let startupPreparedId = 0;
 
 function init() {
 }
@@ -85,6 +86,7 @@ function enable() {
     };
 
     monitorsChangedId = Main.layoutManager.connect('monitors-changed', addLogo);
+    startupPreparedId = Main.layoutManager.connect('startup-prepared', addLogo);
     addLogo();
 }
 
@@ -92,6 +94,10 @@ function disable() {
     if (monitorsChangedId)
         Main.layoutManager.disconnect(monitorsChangedId);
     monitorsChangedId = 0;
+
+    if (startupPreparedId)
+        Main.layoutManager.disconnect(startupPreparedId);
+    startupPreparedId = 0;
 
     forEachBackgroundManager(function(bgManager) {
         bgManager._logo.actor.destroy();
