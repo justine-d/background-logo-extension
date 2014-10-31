@@ -72,21 +72,20 @@ function forEachBackgroundManager(func) {
     Main.layoutManager._bgManagers.forEach(func);
 }
 
-function monitorsChanged() {
-    forEachBackgroundManager(function(bgManager) {
-        bgManager._logo = new BackgroundLogo(bgManager);
-    });
-};
-
 let monitorsChangedId = 0;
 
 function init() {
 }
 
 function enable() {
-    monitorsChangedId = Main.layoutManager.connect('monitors-changed',
-                                                   monitorsChanged);
-    monitorsChanged();
+    let addLogo = function() {
+        forEachBackgroundManager(function(bgManager) {
+            bgManager._logo = new BackgroundLogo(bgManager);
+        });
+    };
+
+    monitorsChangedId = Main.layoutManager.connect('monitors-changed', addLogo);
+    addLogo();
 }
 
 function disable() {
