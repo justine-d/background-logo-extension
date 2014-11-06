@@ -1,6 +1,7 @@
 {
-"uuid": "background-logo@marketing.fedoraproject.org",
+"uuid": "background-logo@fedorahosted.org",
 "name": "Background Logo",
 "description": "Overlay a tasteful logo on the background to enhance the user experience",
-"shell-version": ["3.14", "3.15.1"]
+"shell-version": ["3.14", "3.15.1"],
+"url": "https://git.fedorahosted.org/git/background-logo-extension.git"
 }
