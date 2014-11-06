@@ -68,6 +68,8 @@ const BackgroundLogo = new Lang.Class({
     _init: function(bgManager) {
         this._bgManager = bgManager;
 
+        this._textureCache = St.TextureCache.get_default();
+
         this.actor = new St.Widget({ layout_manager: new Clutter.BinLayout(),
                                      opacity: 0 });
         bgManager._container.add_actor(this.actor);
@@ -76,13 +78,16 @@ const BackgroundLogo = new Lang.Class({
         let constraint = new WorkAreaConstraint({ index: monitorIndex });
         this.actor.add_constraint(constraint);
 
+        this._bin = new St.Widget({ style_class: 'background-logo-bin',
+                                    x_expand: true, y_expand: true,
+                                    x_align: Clutter.ActorAlign.END,
+                                    y_align: Clutter.ActorAlign.END });
+        this.actor.add_actor(this._bin);
+
         let file = Gio.File.new_for_uri(LOGO_URI);
-        this._icon = new St.Icon({ style_class: 'background-logo-icon',
-                                   gicon: new Gio.FileIcon({ file: file }),
-                                   x_expand: true, y_expand: true,
-                                   x_align: Clutter.ActorAlign.END,
-                                   y_align: Clutter.ActorAlign.END });
-        this.actor.add_actor(this._icon);
+        let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+        this._icon = this._textureCache.load_file_async(file, -1, -1, scaleFactor);
+        this._bin.add_actor(this._icon);
 
         bgManager.backgroundActor.connect('destroy', Lang.bind(this, this._backgroundDestroyed));
 
