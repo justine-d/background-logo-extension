@@ -124,23 +124,32 @@ const BackgroundLogo = new Lang.Class({
     }
 });
 
+
+let monitorsChangedId = 0;
+let startupPreparedId = 0;
+let logos = [];
+
 function forEachBackgroundManager(func) {
     Main.overview._bgManagers.forEach(func);
     Main.layoutManager._bgManagers.forEach(func);
 }
 
-let monitorsChangedId = 0;
-let startupPreparedId = 0;
+function addLogo() {
+    destroyLogo();
+    forEachBackgroundManager(function(bgManager) {
+        logos.push(new BackgroundLogo(bgManager));
+    });
+}
+
+function destroyLogo() {
+    logos.forEach(function(l) { l.actor.destroy(); });
+    logos = [];
+}
 
 function init() {
 }
 
 function enable() {
-    let addLogo = function() {
-        forEachBackgroundManager(function(bgManager) {
-            bgManager._logo = new BackgroundLogo(bgManager);
-        });
-    };
 
     monitorsChangedId = Main.layoutManager.connect('monitors-changed', addLogo);
     startupPreparedId = Main.layoutManager.connect('startup-prepared', addLogo);
@@ -156,8 +165,5 @@ function disable() {
         Main.layoutManager.disconnect(startupPreparedId);
     startupPreparedId = 0;
 
-    forEachBackgroundManager(function(bgManager) {
-        bgManager._logo.actor.destroy();
-        delete bgManager._logo;
-    });
+    destroyLogo();
 }
