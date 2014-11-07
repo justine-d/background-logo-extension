@@ -7,6 +7,8 @@ AM_INIT_AUTOMAKE([1.10 dist-xz no-dist-gzip foreign tar-ustar])
 
 m4_ifdef([AM_SILENT_RULES],[AM_SILENT_RULES([yes])])
 
+GLIB_GSETTINGS
+
 dnl From gnome-shell-extensions
 SHELL_VERSION="$PACKAGE_VERSION"
 shell_major=`echo "$PACKAGE_VERSION" | cut -d'.' -f1`

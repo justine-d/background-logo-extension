@@ -24,7 +24,9 @@ const Layout = imports.ui.layout;
 const Main = imports.ui.main;
 const Tweener = imports.ui.tweener;
 
-const LOGO_URI = 'file:///usr/share/icons/hicolor/scalable/apps/start-here.svg';
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Convenience = Me.imports.convenience;
 
 const WorkAreaConstraint = new Lang.Class({
     Name: 'WorkAreaConstraint',
@@ -68,6 +70,17 @@ const BackgroundLogo = new Lang.Class({
     _init: function(bgManager) {
         this._bgManager = bgManager;
 
+        this._settings = Convenience.getSettings();
+
+        this._settings.connect('changed::logo-file',
+                               Lang.bind(this, this._updateLogo));
+        this._settings.connect('changed::logo-size',
+                               Lang.bind(this, this._updateScale));
+        this._settings.connect('changed::logo-position',
+                               Lang.bind(this, this._updatePosition));
+        this._settings.connect('changed::logo-border',
+                               Lang.bind(this, this._updateBorder));
+
         this._textureCache = St.TextureCache.get_default();
 
         this.actor = new St.Widget({ layout_manager: new Clutter.BinLayout(),
@@ -78,21 +91,76 @@ const BackgroundLogo = new Lang.Class({
         let constraint = new WorkAreaConstraint({ index: monitorIndex });
         this.actor.add_constraint(constraint);
 
-        this._bin = new St.Widget({ style_class: 'background-logo-bin',
-                                    x_expand: true, y_expand: true,
-                                    x_align: Clutter.ActorAlign.END,
-                                    y_align: Clutter.ActorAlign.END });
+        this._bin = new St.Widget({ x_expand: true, y_expand: true });
         this.actor.add_actor(this._bin);
 
-        let file = Gio.File.new_for_uri(LOGO_URI);
-        let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-        this._icon = this._textureCache.load_file_async(file, -1, -1, scaleFactor);
-        this._bin.add_actor(this._icon);
+        this._settings.bind('logo-opacity', this._bin, 'opacity',
+                            Gio.SettingsBindFlags.DEFAULT);
+
+        this._updateLogo();
+        this._updatePosition();
+        this._updateBorder();
 
         bgManager.backgroundActor.connect('destroy', Lang.bind(this, this._backgroundDestroyed));
 
         bgManager.connect('changed', Lang.bind(this, this._updateVisibility));
         this._updateVisibility();
+    },
+
+    _updateLogo: function() {
+        if (this._icon)
+            this._icon.destroy();
+
+        let filename = this._settings.get_string('logo-file');
+        let file = Gio.File.new_for_commandline_arg(filename);
+        let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+        if (this._textureCache.load_file_async) { // > 3.14
+            this._icon = this._textureCache.load_file_async(file, -1, -1, scaleFactor);
+        } else { // <= 3.14
+            this._icon = this._textureCache.load_uri_async(file.get_uri(), -1, -1, scaleFactor);
+        }
+        this._icon.connect('allocation-changed',
+                           Lang.bind(this, this._updateScale));
+        this._bin.add_actor(this._icon);
+    },
+
+    _updateScale: function() {
+        if (this._icon.width == 0)
+            return;
+
+        let size = this._settings.get_double('logo-size');
+        let width = this.actor.width * size / 100;
+        let height = this._icon.height * width / this._icon.width;
+        this._icon.set_size(width, height);
+    },
+
+    _updatePosition: function() {
+        let xAlign, yAlign;
+        switch (this._settings.get_string('logo-position')) {
+            case 'center':
+                xAlign = Clutter.ActorAlign.CENTER;
+                yAlign = Clutter.ActorAlign.CENTER;
+                break;
+            case 'bottom-left':
+                xAlign = Clutter.ActorAlign.START;
+                yAlign = Clutter.ActorAlign.END;
+                break;
+            case 'bottom-center':
+                xAlign = Clutter.ActorAlign.CENTER;
+                yAlign = Clutter.ActorAlign.END;
+                break;
+            case 'bottom-right':
+                xAlign = Clutter.ActorAlign.END;
+                yAlign = Clutter.ActorAlign.END;
+                break;
+        }
+        this._bin.x_align = xAlign;
+        this._bin.y_align = yAlign;
+    },
+
+    _updateBorder: function() {
+        let border = this._settings.get_uint('logo-border');
+        this.actor.style = 'padding: %dpx;'.format(border);
     },
 
     _updateVisibility: function() {

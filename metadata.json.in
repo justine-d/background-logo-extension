@@ -2,6 +2,7 @@
 "uuid": "@uuid@",
 "name": "Background Logo",
 "description": "Overlay a tasteful logo on the background to enhance the user experience",
+"settings-schema": "@settings_schema@",
 "shell-version": ["@shell_version@"],
 "url": "https://git.fedorahosted.org/git/background-logo-extension.git"
 }
