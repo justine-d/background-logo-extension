@@ -7,6 +7,7 @@ dist_extension_DATA =	\
 	COPYING		\
 	convenience.js	\
 	extension.js	\
+	prefs.js	\
 	$(NULL)
 nodist_extension_DATA = metadata.json
 
