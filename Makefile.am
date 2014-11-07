@@ -1,13 +1,13 @@
-UUID:=background-logo@fedorahosted.org
-NULL:=
+UUID := background-logo@fedorahosted.org
+NULL :=
 
-extensiondir=$(datadir)/gnome-shell/extensions/$(UUID)
-dist_extension_DATA=	\
+extensiondir = $(datadir)/gnome-shell/extensions/$(UUID)
+dist_extension_DATA =	\
 	COPYING		\
 	extension.js	\
 	stylesheet.css	\
 	$(NULL)
-nodist_extension_DATA=metadata.json
+nodist_extension_DATA = metadata.json
 
 EXTRA_DIST = metadata.json.in
 
