@@ -123,7 +123,7 @@ const BackgroundLogoPrefsWidget = new Lang.Class({
 
     _createBackgroundThumbnail: function(width, height) {
         let settings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
-        let uri = settings.get_default_value('picture-uri').deep_unpack();
+        let uri = settings.get_value('picture-uri').deep_unpack();
         let file = Gio.File.new_for_commandline_arg(uri);
 
         if (uri.endsWith('.xml')) {
