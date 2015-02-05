@@ -41,5 +41,10 @@
       <summary>Logo opacity</summary>
       <description>The opacity of the logo</description>
     </key>
+    <key type="b" name="always-show">
+      <default>false</default>
+      <summary>Always show</summary>
+      <description>Show the logo on all backgrounds</description>
+    </key>
   </schema>
 </schemalist>

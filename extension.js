@@ -80,6 +80,8 @@ const BackgroundLogo = new Lang.Class({
                                Lang.bind(this, this._updatePosition));
         this._settings.connect('changed::logo-border',
                                Lang.bind(this, this._updateBorder));
+        this._settings.connect('changed::always-show',
+                               Lang.bind(this, this._updateVisibility));
 
         this._textureCache = St.TextureCache.get_default();
 
@@ -165,16 +167,20 @@ const BackgroundLogo = new Lang.Class({
 
     _updateVisibility: function() {
         let background = this._bgManager.backgroundActor.background._delegate;
-        let defaultUri = background._settings.get_value('picture-uri');
+        let defaultUri = background._settings.get_default_value('picture-uri');
         let file = Gio.File.new_for_commandline_arg(defaultUri.deep_unpack());
 
         let visible;
-        if (background._file) // > 3.14
+        if (this._settings.get_boolean('always-show'))
+            visible = true;
+        else if (background._file) // > 3.14
             visible = background._file.equal(file);
-        else if (background._filename) // <= 3.14
+        else /* if (background._filename) // <= 3.14 */
             visible = background._filename == file.get_path();
+        /*
         else // background == NONE
             visible = false;
+            */
 
         Tweener.addTween(this.actor,
                          { opacity: visible ? 255 : 0,

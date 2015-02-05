@@ -32,6 +32,8 @@ const BackgroundLogoPrefsWidget = new Lang.Class({
                 if (key == 'logo-file' ||
                     key == 'logo-size')
                     this._logo = null;
+                else if (key == 'always-show')
+                    this._background = null;
                 this._preview.queue_draw();
             }));
 
@@ -74,6 +76,11 @@ const BackgroundLogoPrefsWidget = new Lang.Class({
         adjustment = this._createAdjustment('logo-opacity', 1.0);
         scale = new Gtk.Scale({ adjustment: adjustment, draw_value: false });
         this._addRow(5, "Opacity", scale);
+
+        let toggle = new Gtk.Switch();
+        this._settings.bind('always-show', toggle, 'state',
+                            Gio.SettingsBindFlags.DEFAULT);
+        this._addRow(6, "Always show", toggle);
     },
 
     _addRow: function(row, label, widget) {
@@ -123,7 +130,9 @@ const BackgroundLogoPrefsWidget = new Lang.Class({
 
     _createBackgroundThumbnail: function(width, height) {
         let settings = new Gio.Settings({ schema_id: BACKGROUND_SCHEMA });
-        let uri = settings.get_value('picture-uri').deep_unpack();
+        let uri = this._settings.get_boolean('always-show') ?
+            settings.get_value('picture-uri').deep_unpack() :
+            settings.get_default_value('picture-uri').deep_unpack();
         let file = Gio.File.new_for_commandline_arg(uri);
 
         if (uri.endsWith('.xml')) {
